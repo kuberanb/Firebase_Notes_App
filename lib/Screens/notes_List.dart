@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_todo/Screens/create_notes.dart';
 import 'package:firebase_todo/Screens/search_notes.dart';
 import 'package:firebase_todo/Screens/view_notes.dart';
@@ -31,6 +32,8 @@ class _NotesListState extends State<NotesList> {
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.blue,
@@ -38,7 +41,11 @@ class _NotesListState extends State<NotesList> {
         actions: [
           IconButton(
             onPressed: () {
-              Navigator.of(context).push(MaterialPageRoute(builder: ((context) => SearchNotes(datas: basketItems)),),);
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: ((context) => SearchNotes(datas: basketItems)),
+                ),
+              );
             },
             icon: const Icon(
               Icons.search,
@@ -63,51 +70,77 @@ class _NotesListState extends State<NotesList> {
           style: TextStyle(color: Colors.white, fontSize: 22),
         ),
       ),
-      body: SizedBox(
-        height: double.infinity,
-        width: double.infinity,
-        child: ListView.separated(
-            itemBuilder: ((context, index) {
-              return GestureDetector(
-                onTap: (() {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: ((context) => ViewNotes(
-                          title: basketItems[index].title,
-                          content: basketItems[index].content)),
+      body: Column(
+        children: [
+          SizedBox(
+            height: 0.8 * screenHeight,
+            width: double.infinity,
+            child: ListView.separated(
+                itemBuilder: ((context, index) {
+                  return GestureDetector(
+                    onTap: (() {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: ((context) => ViewNotes(
+                              title: basketItems[index].title,
+                              content: basketItems[index].content)),
+                        ),
+                      );
+                    }),
+                    child: ListTile(
+                      title: Text(
+                        basketItems[index].title,
+                        style: const TextStyle(fontSize: 18),
+                      ),
+                      subtitle: Text(
+                        basketItems[index].content,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontSize: 15),
+                      ),
+                      trailing: IconButton(
+                        onPressed: () {
+                          deleteRecords(basketItems[index].id);
+                        },
+                        icon: const Icon(
+                          Icons.delete,
+                          color: Colors.red,
+                          size: 22,
+                        ),
+                      ),
                     ),
                   );
                 }),
-                child: ListTile(
-                  title: Text(
-                    basketItems[index].title,
-                    style: const TextStyle(fontSize: 18),
-                  ),
-                  subtitle: Text(
-                    basketItems[index].content,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 15),
-                  ),
-                  trailing: IconButton(
-                    onPressed: () {
-                      deleteRecords(basketItems[index].id);
-                    },
-                    icon: const Icon(
-                      Icons.delete,
-                      color: Colors.red,
-                      size: 22,
-                    ),
-                  ),
+                separatorBuilder: ((context, index) {
+                  return const SizedBox(
+                    height: 12,
+                  );
+                }),
+                itemCount: basketItems.length),
+          ),
+          Column(
+            children: [
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: Text(
+                    ' Logged in as ${FirebaseAuth.instance.currentUser!.email.toString()}'),
+              ),
+              ElevatedButton.icon(
+                onPressed: () {
+                  SignOut();
+                },
+                icon: const Icon(
+                  Icons.lock,
+                  color: Colors.white,
                 ),
-              );
-            }),
-            separatorBuilder: ((context, index) {
-              return const SizedBox(
-                height: 12,
-              );
-            }),
-            itemCount: basketItems.length),
+                label: const Text(
+                  'Sign Out',
+                  style: TextStyle(color: Colors.white, fontSize: 16),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -137,4 +170,12 @@ class _NotesListState extends State<NotesList> {
   deleteRecords(String id) {
     FirebaseFirestore.instance.collection(collectionName).doc(id).delete();
   }
+  
+
+  Future SignOut() async{
+    
+    await FirebaseAuth.instance.signOut();
+
+  }
+
 }

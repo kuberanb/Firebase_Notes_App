@@ -1,35 +1,30 @@
-import 'dart:ui';
-
 import 'package:email_validator/email_validator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_todo/Screens/forgot_password_page.dart';
+import 'package:firebase_todo/Screens/Utills.dart';
 import 'package:firebase_todo/main.dart';
 import 'package:flutter/material.dart';
 
-import 'Utills.dart';
-
-class LoginPage extends StatefulWidget {
-  final VoidCallback onClickSignUP;
-  const LoginPage({super.key, required this.onClickSignUP});
+class SignUpPage extends StatefulWidget {
+  final Function() onClickSignIn;
+  const SignUpPage({super.key, required this.onClickSignIn});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<SignUpPage> createState() => _SignUpPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
-  final emailController = TextEditingController();
-  final passwordController = TextEditingController();
+final emailController = TextEditingController();
+final passwordController = TextEditingController();
 
-  @override
-  void dispose() {
-    // TODO: implement dispose
-    emailController.dispose();
-    passwordController.dispose();
-    super.dispose();
-  }
-
+class _SignUpPageState extends State<SignUpPage> {
   @override
   Widget build(BuildContext context) {
+    @override
+    void dispose() {
+      // TODO: implement dispose
+      emailController.dispose();
+      passwordController.dispose();
+    }
+
     final screenHeight = MediaQuery.of(context).size.height;
     // final screenWidth = MediaQuery.of(context).size.width;
 
@@ -84,37 +79,24 @@ class _LoginPageState extends State<LoginPage> {
             ElevatedButton.icon(
               onPressed: () {
                 formKey.currentState!.validate();
-                SignIn();
+                signUp();
               },
               icon: const Icon(
-                Icons.lock,
+                Icons.arrow_right,
+                size: 35,
                 color: Colors.white,
               ),
               label: const Text(
-                'Sign In',
+                'Sign Up',
                 style: TextStyle(color: Colors.white, fontSize: 16),
-              ),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).push(MaterialPageRoute(builder: ((context) => const ForgotPasswordPage()),),);
-              },
-              child: const Text(
-                'Forgot Password',
-                style: TextStyle(
-                    color: Colors.blue,
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                    decoration: TextDecoration.underline),
               ),
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Text(
-                  'No Account',
+                  'Already have an Account? ',
                   style: TextStyle(
-                    decoration: TextDecoration.underline,
                     fontSize: 14,
                   ),
                 ),
@@ -122,9 +104,9 @@ class _LoginPageState extends State<LoginPage> {
                   width: 5,
                 ),
                 TextButton(
-                  onPressed: widget.onClickSignUP,
+                  onPressed: widget.onClickSignIn,
                   child: const Text(
-                    'SignUp',
+                    'LogIn',
                     style: TextStyle(
                         color: Colors.blue,
                         fontSize: 15,
@@ -140,7 +122,7 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Future SignIn() async {
+  Future signUp() async {
     showDialog(
       context: context,
       builder: ((context) {
@@ -151,10 +133,11 @@ class _LoginPageState extends State<LoginPage> {
     );
 
     try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-          email: emailController.text.trim(),
-          password: passwordController.text.trim());
-    } on FirebaseAuth catch (e) {
+      await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
+      );
+    } on FirebaseAuthException catch (e) {
       print(e);
       Utills.showSnackBar(e.toString());
     }
