@@ -1,4 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_todo/Screens/main_page.dart';
 import 'package:firebase_todo/Screens/notes_List.dart';
 import 'package:flutter/material.dart';
 
@@ -22,7 +23,7 @@ class MyApp extends StatelessWidget {
 
         primarySwatch: Colors.blue,
       ),
-      home: const NotesList(),
+      home: const MainPage(),
     );
   }
 }
