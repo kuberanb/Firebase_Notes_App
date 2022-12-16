@@ -13,20 +13,26 @@ class ForgotPasswordPage extends StatefulWidget {
   State<ForgotPasswordPage> createState() => _ForgotPasswordPageState();
 }
 
-final emailController = TextEditingController();
+
 
 class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
-  @override
-  void dispose() {
-    // TODO: implement dispose
-    emailController.dispose();
-    super.dispose();
-  }
+
+final emailController = TextEditingController();
+   static final  formKey2 = GlobalKey<FormState>();
+
+
+
+//  @override
+//   void dispose() {
+//     // TODO: implement dispose
+//     emailController.dispose();
+//     super.dispose();
+//   }
+ 
 
   @override
   Widget build(BuildContext context) {
     final ScreenHeight = MediaQuery.of(context).size.height;
-    final formKey = GlobalKey<FormState>();
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
@@ -46,53 +52,67 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         ),
       ),
       body: Center(
-        child: Column(children: [
-          const SizedBox(
-            height: 12,
-          ),
-          const Text(
-            '''Recieve an email to
-reset your Password''',
-            style: TextStyle(
-                color: Colors.black, fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          SizedBox(
-            height: 0.05 * ScreenHeight,
-          ),
-          TextFormField(
-            controller: emailController,
-            validator: ((value) {
-              if (value != null && !EmailValidator.validate(value)) {
-                return 'Enter Valid Email';
-              } else {
-                return null;
-              }
-            }),
-            decoration: InputDecoration(
-                labelText: 'Email',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                )),
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-          ElevatedButton.icon(
-            onPressed: () {
-              formKey.currentState!.validate();
-            },
-            icon: const Icon(Icons.email_outlined),
-            label: const Text(
-              'Reset Password',
-              style: TextStyle(
-                color: Colors.black,
-                fontSize: 18,
+        child: 
+     //   Form(
+
+       //   key: formKey,
+       //   child: 
+          Form(
+            key: formKey2,
+            child: Column(children: [
+              const SizedBox(
+                height: 12,
               ),
-            ),
+              const Text(
+                '''Recieve an email to
+reset your Password''',
+                style: TextStyle(
+                    color: Colors.black, fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(
+                height: 0.05 * ScreenHeight,
+              ),
+              TextFormField(
+                controller: emailController,
+                validator: ((value) {
+                  if (value != null && !EmailValidator.validate(value)) {
+                    return 'Enter Valid Email';
+                  } else if(value != null && value.isEmpty){
+                    return 'Enter Email';
+                  }else{
+                    return null;
+                  }
+                }),
+                decoration: InputDecoration(
+                    labelText: 'Email',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),),
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              ElevatedButton.icon(
+                 onPressed:
+                  // verifyEmail,
+                () {
+                  formKey2.currentState!.validate();
+                  verifyEmail();
+                },
+                icon: const Icon(Icons.email_outlined),
+                label: const Text(
+                  'Reset Password',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 18,
+                  ),
+                ),
+              ),
+            ]),
           ),
-        ]),
-      ),
-    );
+        ),
+      );
+  //  );
   }
 
   Future verifyEmail() async {
@@ -107,7 +127,7 @@ reset your Password''',
 
     try {
       await FirebaseAuth.instance
-          .sendPasswordResetEmail(email: emailController.text);
+          .sendPasswordResetEmail(email: emailController.text.trim());
       Utills.showSnackBar('Password Reset Email Sent');
       Navigator.of(context).popUntil((route) => route.isFirst);
     } on FirebaseAuth catch (e) {
